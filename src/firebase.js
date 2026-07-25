@@ -20,12 +20,12 @@ import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 
 export const firebaseConfig = {
-  apiKey: 'IDE_MASOLD_AZ_API_KEY_ET',
-  authDomain: 'IDE_MASOLD_AZ_AUTH_DOMAIN_T',
-  projectId: 'IDE_MASOLD_A_PROJECT_ID_T',
-  storageBucket: 'IDE_MASOLD_A_STORAGE_BUCKET_OT',
-  messagingSenderId: 'IDE_MASOLD_A_SENDER_ID_T',
-  appId: 'IDE_MASOLD_AZ_APP_ID_OT',
+  apiKey: 'AIzaSyD-vHGz5lWhWE1JbgHaZH9TCIMftJJviL0',
+  authDomain: 'hazimunka-app-94fec.firebaseapp.com',
+  projectId: 'hazimunka-app-94fec',
+  storageBucket: 'hazimunka-app-94fec.firebasestorage.app',
+  messagingSenderId: '586384206209',
+  appId: '1:586384206209:web:76ccf08ca1696288532080',
 }
 
 // Megnézzük, hogy kicserélted-e már a fenti adatokat.
