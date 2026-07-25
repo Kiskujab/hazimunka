@@ -1,0 +1,29 @@
+# Függőségek
+node_modules
+
+# Build eredménye
+dist
+dist-ssr
+
+# Naplók
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Szerkesztő / rendszer fájlok
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Környezeti változók (ha később használnál ilyet)
+.env
+.env.local

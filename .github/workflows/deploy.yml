@@ -1,0 +1,71 @@
+# ============================================================
+#  AUTOMATIKUS KÖZZÉTÉTEL GITHUB PAGES-RE
+#
+#  Ez a fájl minden "main" ágra való feltöltés (push) után
+#  automatikusan lefordítja és közzéteszi az oldalt.
+#
+#  Egyszeri beállítás a GitHub-on:
+#    Settings -> Pages -> "Source" = GitHub Actions
+#
+#  (Ha inkább kézzel szeretnéd, használd az "npm run deploy"
+#   parancsot – a README-ben mindkét módszer le van írva.)
+# ============================================================
+
+name: Közzététel GitHub Pages-re
+
+on:
+  push:
+    branches: [main]
+  # Kézi indítás is lehetséges az Actions fülről
+  workflow_dispatch:
+
+# Jogosultságok, amikre a közzétételhez szükség van
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Egyszerre csak egy közzététel fusson
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  # 1. lépés: az oldal lefordítása
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kód letöltése
+        uses: actions/checkout@v4
+
+      - name: Node.js beállítása
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Csomagok telepítése
+        run: npm ci
+
+      - name: Oldal fordítása
+        run: npm run build
+
+      - name: Pages előkészítése
+        uses: actions/configure-pages@v5
+
+      - name: Elkészült oldal feltöltése
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  # 2. lépés: közzététel
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Közzététel
+        id: deployment
+        uses: actions/deploy-pages@v4

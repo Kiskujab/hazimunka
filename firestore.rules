@@ -1,0 +1,86 @@
+// ============================================================
+//  FIRESTORE BIZTONSÁGI SZABÁLYOK
+//
+//  EZT MÁSOLD BE a Firebase Console-ban:
+//    Build -> Firestore Database -> Rules fül
+//    -> töröld a régit, illeszd be ezt, majd "Publish"
+//
+//  Miért fontos? A firebase.js-ben lévő adatok publikusak.
+//  A valódi védelmet EZEK a szabályok adják: itt dől el,
+//  ki mit olvashat és írhat az adatbázisban.
+// ============================================================
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --- Segédfüggvények ---
+
+    // Be van jelentkezve?
+    function bejelentkezett() {
+      return request.auth != null;
+    }
+
+    // Admin-e a bejelentkezett felhasználó?
+    // Megnézzük a saját users dokumentumában a "role" mezőt.
+    function adminE() {
+      return bejelentkezett()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // --- FELHASZNÁLÓK ---
+    match /users/{userId} {
+
+      // Bárki (aki be van jelentkezve) láthatja a többieket.
+      // Ez kell a ranglistához.
+      allow read: if bejelentkezett();
+
+      // Regisztrációkor csak a SAJÁT adatlapodat hozhatod létre,
+      // 0 ponttal és "user" szerepkörrel. Így senki nem tudja
+      // magát adminként regisztrálni.
+      allow create: if bejelentkezett()
+                    && request.auth.uid == userId
+                    && request.resource.data.role == 'user'
+                    && request.resource.data.total_points == 0;
+
+      // Módosítás:
+      //  - admin bármit módosíthat (pontok, szerepkör)
+      //  - sima felhasználó csak a sajátját, DE a szerepkörét nem
+      //    írhatja át (nem tudja magát adminná tenni)
+      allow update: if adminE()
+                    || (bejelentkezett()
+                        && request.auth.uid == userId
+                        && request.resource.data.role == resource.data.role);
+
+      // Törölni csak admin tud
+      allow delete: if adminE();
+    }
+
+    // --- FELADATOK ---
+    match /tasks/{taskId} {
+      // Mindenki láthatja a feladatokat
+      allow read: if bejelentkezett();
+
+      // De csak admin hozhat létre / módosíthat / törölhet
+      allow write: if adminE();
+    }
+
+    // --- NAPLÓ (elvégzett házimunkák) ---
+    match /logs/{logId} {
+      // Mindenki láthatja (ebből készül a családi tevékenység lista)
+      allow read: if bejelentkezett();
+
+      // Csak a SAJÁT nevedben írhatsz be bejegyzést
+      allow create: if bejelentkezett()
+                    && request.resource.data.user_id == request.auth.uid;
+
+      // Bejegyzést utólag módosítani senki nem tud
+      allow update: if false;
+
+      // Törölni csak admin tud (pl. hibás bejegyzés visszavonása)
+      allow delete: if adminE();
+    }
+  }
+}
