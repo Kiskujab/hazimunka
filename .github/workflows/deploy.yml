@@ -44,8 +44,11 @@ jobs:
           node-version: 20
           cache: npm
 
+      # "npm install" és nem "npm ci": a package-lock.json a te gépeden
+      # (macOS/Windows) készült, a GitHub szervere viszont Linux. Az "npm ci"
+      # ilyenkor hibát dobna a hiányzó Linux-specifikus csomagok miatt.
       - name: Csomagok telepítése
-        run: npm ci
+        run: npm install
 
       - name: Oldal fordítása
         run: npm run build
